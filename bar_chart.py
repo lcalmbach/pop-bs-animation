@@ -13,6 +13,9 @@ def create_animation(df, flag_folder):
     # Dictionary to store flag images (load once for efficiency)
     flag_images = {}
     
+    # Delhi 
+    # #Kanpur, Uttar Pradesh
+
     # Load all unique flags
     for iso_code in df['ISO3_code'].unique():
         try:
@@ -57,7 +60,7 @@ def create_animation(df, flag_folder):
             
             # Add population value
             ax.text(row['Population'], i,
-                   f' {row["Population"]:,.0f}',
+                   f' {row["Population"]:,.2f}',
                    va='center', ha='left', fontweight='bold')
             
             # Add country name
@@ -80,7 +83,7 @@ def create_animation(df, flag_folder):
                 fontsize=12, fontweight='bold',
                 bbox=dict(facecolor='white', edgecolor='none', alpha=0.7))
         
-        ax.set_xlabel('Population')
+        ax.set_xlabel('Population (in millions)')
         
         # Format x-axis with comma separator
         ax.xaxis.set_major_formatter(ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
