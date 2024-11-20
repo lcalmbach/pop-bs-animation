@@ -5,6 +5,7 @@ import matplotlib.ticker as ticker
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 import numpy as np
 from PIL import Image
+from matplotlib.animation import FFMpegWriter
 
 def create_animation(df, flag_folder):
     # Create figure and axis
@@ -13,9 +14,6 @@ def create_animation(df, flag_folder):
     # Dictionary to store flag images (load once for efficiency)
     flag_images = {}
     
-    # Delhi 
-    # #Kanpur, Uttar Pradesh
-
     # Load all unique flags
     for iso_code in df['ISO3_code'].unique():
         try:
@@ -30,6 +28,9 @@ def create_animation(df, flag_folder):
     # Get unique timestamps
     df['timestamp'] = pd.to_datetime(df['Time'].astype(str) + '-' + df['Month'].astype(str), format='%Y-%m')
     timestamps = sorted(df['timestamp'].unique())
+
+    # Set of country names that need stabilization (7-8 characters)
+    unstable_names = {'Germany', 'Mexico', 'Ethiopia', 'Bangladesh'}
     
     def animate(frame):
         ax.clear()
@@ -63,8 +64,12 @@ def create_animation(df, flag_folder):
                    f' {row["Population"]:,.2f}',
                    va='center', ha='left', fontweight='bold')
             
-            # Add country name
-            ax.text(-0.1, i, f"{row['Location']}", 
+            # Add country name with space only for unstable names
+            country_name = row['Location']
+            if country_name in unstable_names:
+                country_name = f"{country_name}  "
+            
+            ax.text(-0.1, i, country_name, 
                    ha='right', va='center', transform=ax.get_yaxis_transform())
         
         # Remove y-axis labels since we're adding them manually
@@ -73,7 +78,7 @@ def create_animation(df, flag_folder):
         # Set fixed title
         ax.set_title('Top 10 Populations', pad=20, fontsize=14, fontweight='bold')
         
-        # Add month and year text
+        # Add year and month text (year on top) in upper right
         plt.text(0.75, 0.95, f'Year: {current_time.year}',
                 transform=ax.transAxes,
                 fontsize=12, fontweight='bold',
@@ -102,7 +107,7 @@ def create_animation(df, flag_folder):
     anim = animation.FuncAnimation(fig, animate,
                                  frames=len(timestamps),
                                  interval=50,
-                                 repeat=True)
+                                 repeat=False)
     
     return fig, anim
 
@@ -110,6 +115,17 @@ def create_animation(df, flag_folder):
 df = pd.read_csv('test.csv')
 
 # Example usage
-flag_folder = "./flags"  # Replace with actual path
+flag_folder = "./flags"
 fig, anim = create_animation(df, flag_folder)
+
+# Set up the writer
+writer = FFMpegWriter(
+    fps=30,  # Frames per second
+    metadata=dict(artist='Me'),
+    bitrate=1800
+)
+
+# Save the animation
+anim.save('population_animation.mp4', writer=writer)
+
 plt.show()
