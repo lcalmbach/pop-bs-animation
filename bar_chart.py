@@ -40,13 +40,13 @@ def create_animation(df, flag_folder):
         current_data = df[df['timestamp'] == current_time]
         
         # Get top 10 populations
-        top_10 = current_data.nlargest(10, 'Population')
+        top_10 = current_data.nlargest(10, 'Population').reset_index(drop=True)
         
         # Create bars
         bars = ax.barh(range(len(top_10)), top_10['Population'], alpha=0.3)
         
         # Add flags and labels
-        for i, (_, row) in enumerate(top_10.iterrows()):
+        for i, row in top_10.iterrows():
             # Add flag
             if row['ISO3_code'] in flag_images:
                 flag_img = flag_images[row['ISO3_code']]

@@ -82,7 +82,7 @@ def create_animation(csv_path):
     return fig, anim
 
 # Example usage:
-csv_path = 'historical_data.csv'  # Replace with your CSV file path
+csv_path = './data/historical_data.csv'  # Replace with your CSV file path
 fig, anim = create_animation(csv_path)
 plt.show()
 

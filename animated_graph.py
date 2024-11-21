@@ -5,78 +5,73 @@ from matplotlib.dates import DateFormatter
 import matplotlib.dates as mdates
 from datetime import datetime
 
-def create_animation(csv_path):
-    # Read the CSV file
-    df = pd.read_csv(csv_path)
+def create_multi_stock_animation(stock_files):
+    # Read and process all CSV files
+    dfs = {}
+    for file_path in stock_files:
+        company = file_path.split('/')[-1].split('.')[0]  # Extract company name from filename
+        df = pd.read_csv(file_path)
+        df['Date'] = pd.to_datetime(df['Date'], format='%m/%d/%Y')
+        df['Close/Last'] = df['Close/Last'].str.replace('$', '').astype(float)
+        df = df.sort_values('Date')
+        dfs[company] = df
     
-    # Convert Date to datetime using a specific format with 4-digit year
-    df['Date'] = pd.to_datetime(df['Date'], format='%m/%d/%Y')
-    
-    # Convert Close/Last to float (remove $ and convert)
-    df['Close/Last'] = df['Close/Last'].str.replace('$', '').astype(float)
-    
-    # Sort by date in ascending order
-    df = df.sort_values('Date')
-    
-    # Create the figure and axis
+    # Create figure and axis
     fig, ax = plt.subplots(figsize=(12, 6))
     
-    # Function to animate the plot
+    # Colors for each company
+    colors = {'nvidia': 'green', 'intel': 'blue', 'amd': 'red'}
+    
     def animate(frame):
         ax.clear()
         
-        # Plot data up to the current frame
-        data_subset = df.iloc[:frame+1]
+        # Plot data for each company up to current frame
+        for company, df in dfs.items():
+            data_subset = df.iloc[:frame+1]
+            line = ax.plot(data_subset['Date'], data_subset['Close/Last'], 
+                    color=colors[company], linewidth=2, marker='', label=company.upper())
+            
+            # Add price annotation for each company
+            if not data_subset.empty:
+                latest_price = data_subset['Close/Last'].iloc[-1]
+                latest_date = data_subset['Date'].iloc[-1]
+                ax.annotate(f'{company.upper()}: ${latest_price:.2f}', 
+                           xy=(latest_date, latest_price),
+                           xytext=(10, 10), textcoords='offset points',
+                           color=colors[company],
+                           bbox=dict(facecolor='white', edgecolor='none', alpha=0.7))
         
-        # Create the line plot
-        ax.plot(data_subset['Date'], data_subset['Close/Last'], 
-                color='blue', linewidth=2, marker='')
-        
-        # Add the latest price annotation
-        if not data_subset.empty:
-            latest_price = data_subset['Close/Last'].iloc[-1]
-            latest_date = data_subset['Date'].iloc[-1]
-            ax.annotate(f'${latest_price:.2f}', 
-                       xy=(latest_date, latest_price),
-                       xytext=(10, 10), textcoords='offset points',
-                       bbox=dict(facecolor='white', edgecolor='none', alpha=0.7))
-        
-        # Customize the plot
-        ax.set_title('Stock Price Over Time', fontsize=12, pad=20)
+        # Customize plot
+        ax.set_title('Stock Prices Comparison Over Time', fontsize=12, pad=20)
         ax.set_xlabel('Date')
         ax.set_ylabel('Price ($)')
-        
-        # Format x-axis to show month/day/year
         ax.xaxis.set_major_formatter(DateFormatter('%m/%d/%Y'))
         ax.tick_params(axis='x', rotation=45)
-        
-        # Add grid
         ax.grid(True, linestyle='--', alpha=0.7)
+        ax.legend(loc='upper left')
         
-        # Set dynamic y-axis limits based on current subset of data
-        if not data_subset.empty:
-            y_min = data_subset['Close/Last'].min() * 0.95
-            y_max = data_subset['Close/Last'].max() * 1.05
-            ax.set_ylim(y_min, y_max)
+        # Set dynamic y-axis limits
+        all_prices = pd.concat([df['Close/Last'] for df in dfs.values()])
+        y_min = all_prices.min() * 0.95
+        y_max = all_prices.max() * 1.05
+        ax.set_ylim(y_min, y_max)
         
-        # Set x-axis limits to show full date range
-        ax.set_xlim(df['Date'].min(), df['Date'].max())
+        # Set x-axis limits
+        all_dates = pd.concat([df['Date'] for df in dfs.values()])
+        ax.set_xlim(all_dates.min(), all_dates.max())
         
-        # Adjust layout
         plt.tight_layout()
     
-    # Create the animation
+    # Create animation
+    max_frames = max(len(df) for df in dfs.values())
     anim = animation.FuncAnimation(fig, animate, 
-                                 frames=len(df),
-                                 interval=50,  # 200ms between frames
+                                 frames=max_frames,
+                                 interval=50,
                                  repeat=True)
     
     return fig, anim
 
 # Example usage:
-csv_path = 'historical_data.csv'  # Replace with your CSV file path
-fig, anim = create_animation(csv_path)
+stock_files = ['./data/nvidia.csv', './data/intel.csv', './data/amd.csv']
+fig, anim = create_multi_stock_animation(stock_files)
 plt.show()
-
-# Optional: save the animation
-# anim.save('stock_price_animation.gif', writer='pillow')
