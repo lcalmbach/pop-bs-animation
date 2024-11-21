@@ -58,6 +58,7 @@ def create_multi_stock_animation(stock_files):
         
         # Set x-axis limits
         all_dates = pd.concat([df['Date'] for df in dfs.values()])
+        
         ax.set_xlim(all_dates.min(), all_dates.max())
         
         plt.tight_layout()
@@ -66,7 +67,7 @@ def create_multi_stock_animation(stock_files):
     max_frames = max(len(df) for df in dfs.values())
     anim = animation.FuncAnimation(fig, animate, 
                                  frames=max_frames,
-                                 interval=50,
+                                 interval=50, # Number of ms between each frame
                                  repeat=True)
     
     return fig, anim
@@ -74,4 +75,5 @@ def create_multi_stock_animation(stock_files):
 # Example usage:
 stock_files = ['./data/nvidia.csv', './data/intel.csv', './data/amd.csv']
 fig, anim = create_multi_stock_animation(stock_files)
+anim.save('stock_prices.mp4', writer='ffmpeg', fps=60)
 plt.show()

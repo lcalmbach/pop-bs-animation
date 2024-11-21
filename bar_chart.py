@@ -118,14 +118,7 @@ df = pd.read_csv('test.csv')
 flag_folder = "./flags"
 fig, anim = create_animation(df, flag_folder)
 
-# Set up the writer
-writer = FFMpegWriter(
-    fps=30,  # Frames per second
-    metadata=dict(artist='Me'),
-    bitrate=1800
-)
-
 # Save the animation
-anim.save('population_animation.mp4', writer=writer)
+anim.save('population_animation.mp4', writer='ffmpeg', fps=30)
 
 plt.show()
