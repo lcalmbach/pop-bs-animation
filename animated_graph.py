@@ -75,5 +75,5 @@ def create_multi_stock_animation(stock_files):
 # Example usage:
 stock_files = ['./data/nvidia.csv', './data/intel.csv', './data/amd.csv']
 fig, anim = create_multi_stock_animation(stock_files)
-anim.save('stock_prices.mp4', writer='ffmpeg', fps=60)
+anim.save('./outputs/stock_prices.mp4', writer='ffmpeg', fps=60)
 plt.show()

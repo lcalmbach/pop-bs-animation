@@ -119,6 +119,6 @@ flag_folder = "./flags"
 fig, anim = create_animation(df, flag_folder)
 
 # Save the animation
-anim.save('population_animation.mp4', writer='ffmpeg', fps=30)
+anim.save('outputs/population_animation.mp4', writer='ffmpeg', fps=30)
 
 plt.show()
