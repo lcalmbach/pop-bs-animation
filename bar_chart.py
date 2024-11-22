@@ -58,7 +58,7 @@ def create_animation(df, flag_folder):
         top_10 = top_10.sort_values('Population', ascending=True).reset_index(drop=True)
         
         # Create base bars
-        bars = ax.barh(range(len(top_10)), top_10['Population'], alpha=0.3)
+        bars = ax.barh(top_10['Location'], top_10['Population'], alpha=0.3)
         
         # Add visual elements for each country
         for i, row in top_10.iterrows():
