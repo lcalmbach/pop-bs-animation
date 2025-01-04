@@ -11,6 +11,7 @@ from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from PIL import Image
 from pathlib import Path
 
+__version__ = '0.1.0'
 
 def load_flag_images(df, flag_folder):
     """Load and resize all flag images once at startup"""
